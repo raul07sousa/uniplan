@@ -1,0 +1,21 @@
+{
+  "name": "UniPlan 3.0 — Planeador Universitário",
+  "short_name": "UniPlan",
+  "description": "Planeador académico local com regras avançadas, risco, calendário adaptativo, estudo, alertas e histórico.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6fb",
+  "theme_color": "#2457d6",
+  "lang": "pt-PT",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"},
+    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}
+  ],
+  "shortcuts": [
+    {"name":"Adicionar tarefa","url":"./#tasks","icons":[{"src":"icon-192.png","sizes":"192x192"}]},
+    {"name":"Registar estudo","url":"./#study","icons":[{"src":"icon-192.png","sizes":"192x192"}]}
+  ]
+}

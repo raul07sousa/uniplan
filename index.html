@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#2457d6" />
+  <meta name="description" content="UniPlan 3.0: planeamento académico, notas, risco, calendário, estudo e histórico, local e gratuito." />
+  <title>UniPlan 3.0 — Planeador Universitário</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">Saltar para o conteúdo</a>
+  <div id="storageAlert" class="alert danger global-alert" hidden></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="UniPlan — início">
+      <span class="brand-mark">U</span>
+      <span><strong>UniPlan</strong><small>Planeador universitário local</small></span>
+    </a>
+    <div class="semester-switcher">
+      <label for="semesterSelect">Semestre</label>
+      <select id="semesterSelect"></select>
+      <button id="manageSemestersBtn" class="icon-button" type="button" title="Gerir semestres">⚙</button>
+    </div>
+    <div class="top-actions">
+      <button id="themeBtn" class="icon-button" type="button" aria-label="Alternar tema">◐</button>
+      <button id="notificationBtn" class="button secondary notification-button" type="button">Alertas <span id="notificationCount" class="count-badge">0</span></button>
+      <button id="dataBtn" class="button secondary" type="button">Dados</button>
+      <button id="installBtn" class="button primary" type="button" hidden>Instalar</button>
+    </div>
+  </header>
+
+  <main id="mainContent" class="container">
+    <section id="onboarding" class="onboarding card" hidden>
+      <div>
+        <p class="eyebrow">Configuração inicial</p>
+        <h1>Constrói um semestre utilizável em poucos minutos.</h1>
+        <p>O assistente cria o semestre, define a disponibilidade e adiciona a primeira disciplina. Podes alterar tudo depois.</p>
+      </div>
+      <ol class="onboarding-steps">
+        <li>Define o período letivo.</li>
+        <li>Indica quando podes estudar.</li>
+        <li>Cria a primeira disciplina.</li>
+        <li>Adiciona avaliações e tarefas.</li>
+      </ol>
+      <div class="actions">
+        <button id="onboardingStartBtn" class="button primary" type="button">Configurar agora</button>
+        <button id="onboardingDemoBtn" class="button secondary" type="button">Carregar demonstração</button>
+      </div>
+    </section>
+
+    <section class="hero card">
+      <div>
+        <span class="badge">Versão 3.0 · desktop-ready · local-first</span>
+        <h1>Decide o que estudar com base em risco, tempo e resultados.</h1>
+        <p>Regras académicas avançadas, calendário adaptativo, simulações de notas, alertas e histórico — sem conta nem subscrição.</p>
+      </div>
+      <div class="hero-metric"><span id="semesterProgress">0%</span><small>avaliação já realizada</small></div>
+    </section>
+
+    <section class="stats-grid" aria-label="Resumo">
+      <article class="stat card"><span id="courseCount">0</span><small>disciplinas</small></article>
+      <article class="stat card"><span id="pendingTaskCount">0</span><small>tarefas pendentes</small></article>
+      <article class="stat card"><span id="nextDeadline">—</span><small>próximo prazo</small></article>
+      <article class="stat card"><span id="studyHours7">0 h</span><small>estudo nos últimos 7 dias</small></article>
+      <article class="stat card"><span id="passedEcts">0</span><small>ECTS aprovados</small></article>
+      <article class="stat card"><span id="forecastAverage">0</span><small>média prevista</small></article>
+    </section>
+
+    <nav class="tabs" aria-label="Secções principais">
+      <button class="tab active" data-tab="dashboard" type="button">Painel</button>
+      <button class="tab" data-tab="courses" type="button">Disciplinas</button>
+      <button class="tab" data-tab="tasks" type="button">Tarefas</button>
+      <button class="tab" data-tab="calendar" type="button">Calendário</button>
+      <button class="tab" data-tab="study" type="button">Estudo</button>
+      <button class="tab" data-tab="simulator" type="button">Simulador</button>
+      <button class="tab" data-tab="history" type="button">Histórico</button>
+    </nav>
+
+    <section id="dashboardTab" class="tab-panel active">
+      <div class="section-heading">
+        <div><p class="eyebrow">Decisão</p><h2>Onde deves investir tempo</h2><p class="section-copy">O risco combina resultados, mínimos, prazos, dificuldade e estudo recente.</p></div>
+        <button id="settingsBtn" class="button secondary" type="button">Planeamento e alertas</button>
+      </div>
+      <div id="dashboardReminderStrip" class="reminder-strip"></div>
+      <div id="riskOverview" class="risk-overview"></div>
+      <div id="riskCards" class="risk-grid"></div>
+      <div id="dashboardEmpty" class="empty card"><h3>Sem disciplinas neste semestre.</h3><p>Adiciona a primeira disciplina para obter recomendações.</p></div>
+    </section>
+
+    <section id="coursesTab" class="tab-panel">
+      <div class="section-heading">
+        <div><p class="eyebrow">Avaliação</p><h2>Disciplinas e regras</h2><p class="section-copy">Modela componentes, mínimos, assiduidade, exames, recursos e melhorias.</p></div>
+        <div class="actions"><button id="courseTemplateBtn" class="button secondary" type="button">Usar modelo</button><button id="openCourseBtn" class="button primary" type="button">Adicionar disciplina</button></div>
+      </div>
+      <div id="coursesList" class="stack"></div>
+      <div id="coursesEmpty" class="empty card"><h3>Ainda não tens disciplinas.</h3><p>Cria uma disciplina ou usa um modelo de avaliação.</p></div>
+    </section>
+
+    <section id="tasksTab" class="tab-panel">
+      <div class="section-heading"><div><p class="eyebrow">Execução</p><h2>Tarefas</h2><p class="section-copy">Cada tarefa alimenta automaticamente o plano semanal.</p></div><button id="openTaskBtn" class="button primary" type="button">Adicionar tarefa</button></div>
+      <div class="filters card">
+        <label>Estado<select id="taskStatusFilter"><option value="all">Todos</option><option value="pending">Pendentes</option><option value="overdue">Atrasadas</option><option value="done">Concluídas</option></select></label>
+        <label>Disciplina<select id="taskCourseFilter"><option value="all">Todas</option></select></label>
+        <label>Tipo<select id="taskActivityFilter"><option value="all">Todos</option><option value="reading">Leitura</option><option value="exercises">Exercícios</option><option value="project">Projeto</option><option value="review">Revisão</option><option value="other">Outro</option></select></label>
+      </div>
+      <div id="tasksList" class="stack"></div>
+      <div id="tasksEmpty" class="empty card"><h3>Sem tarefas nesta vista.</h3><p>Cria trabalhos, fichas, projetos ou sessões de revisão.</p></div>
+    </section>
+
+    <section id="calendarTab" class="tab-panel">
+      <div class="section-heading calendar-heading">
+        <div><p class="eyebrow">Tempo</p><h2 id="calendarTitle">Semana</h2><p class="section-copy">Arrasta sessões planeadas para outro dia para ajustar o plano.</p></div>
+        <div class="actions"><button id="prevWeekBtn" class="icon-button" type="button">←</button><button id="todayBtn" class="button secondary" type="button">Hoje</button><button id="nextWeekBtn" class="icon-button" type="button">→</button><button id="refreshPlanBtn" class="button secondary" type="button">Recalcular</button><button id="openCommitmentBtn" class="button primary" type="button">Compromisso</button></div>
+      </div>
+      <div id="planComparison" class="plan-comparison card"></div>
+      <div id="calendarWarnings"></div>
+      <div id="weeklyCalendar" class="weekly-calendar"></div>
+    </section>
+
+    <section id="studyTab" class="tab-panel">
+      <div class="section-heading"><div><p class="eyebrow">Consistência</p><h2>Estudo realizado</h2><p class="section-copy">Compara o plano com o que fizeste e regista o método usado.</p></div><button id="openSessionBtn" class="button primary" type="button">Registar sessão</button></div>
+      <div class="study-layout">
+        <article class="timer-card card">
+          <p class="eyebrow">Cronómetro</p><div id="timerDisplay" class="timer-display">00:00:00</div>
+          <label>Disciplina<select id="timerCourseId"><option value="">Sem disciplina</option></select></label>
+          <label>Tarefa<select id="timerTaskId"><option value="">Sem tarefa</option></select></label>
+          <label>Método<select id="timerActivityType"><option value="reading">Leitura</option><option value="exercises">Exercícios</option><option value="project">Projeto</option><option value="review">Revisão</option><option value="other">Outro</option></select></label>
+          <div class="actions"><button id="startTimerBtn" class="button primary" type="button">Iniciar</button><button id="stopTimerBtn" class="button danger" type="button" disabled>Parar e guardar</button></div>
+        </article>
+        <article class="card"><p class="eyebrow">Últimos 7 dias</p><div id="studyKpis" class="study-kpis"></div><div id="studyBars" class="study-bars"></div><div id="activityBreakdown" class="activity-breakdown"></div></article>
+      </div>
+      <div class="section-heading compact"><div><h3>Histórico de sessões</h3></div><label class="inline-filter">Disciplina<select id="sessionCourseFilter"><option value="all">Todas</option></select></label></div>
+      <div id="sessionsList" class="stack"></div><div id="sessionsEmpty" class="empty card"><h3>Ainda não registaste estudo.</h3><p>Usa o cronómetro ou adiciona uma sessão manual.</p></div>
+    </section>
+
+    <section id="simulatorTab" class="tab-panel">
+      <div class="section-heading"><div><p class="eyebrow">Cenários</p><h2>Simulador de notas</h2><p class="section-copy">Testa notas hipotéticas sem alterar os dados reais.</p></div></div>
+      <div class="simulator-layout">
+        <article class="card"><label>Disciplina<select id="simulatorCourseSelect"></select></label><div id="simulatorInputs" class="stack compact-stack"></div></article>
+        <article id="simulatorResult" class="card simulator-result"></article>
+      </div>
+    </section>
+
+    <section id="historyTab" class="tab-panel">
+      <div class="section-heading"><div><p class="eyebrow">Percurso</p><h2>Histórico académico</h2><p class="section-copy">Acompanha ECTS, médias e resultados entre semestres.</p></div><div class="actions"><button id="printReportBtn" class="button secondary" type="button">Relatório / PDF</button><button id="newSemesterBtn" class="button primary" type="button">Novo semestre</button></div></div>
+      <div id="historyKpis" class="history-kpis"></div>
+      <div id="semesterHistory" class="stack"></div>
+    </section>
+  </main>
+
+  <dialog id="onboardingDialog" class="dialog wide">
+    <form id="onboardingForm">
+      <div class="dialog-header"><div><p class="eyebrow">Assistente inicial</p><h2>Configura o primeiro semestre</h2></div><button class="icon-button" type="button" data-close="onboardingDialog">×</button></div>
+      <fieldset><legend>1. Semestre</legend><label>Nome<input id="onboardingSemesterName" required /></label><div class="form-grid"><label>Início<input id="onboardingStartDate" type="date" required /></label><label>Fim<input id="onboardingEndDate" type="date" required /></label></div></fieldset>
+      <fieldset><legend>2. Disponibilidade semanal</legend><div id="onboardingAvailability" class="availability-grid"></div></fieldset>
+      <fieldset><legend>3. Primeira disciplina</legend><label>Nome<input id="onboardingCourseName" required placeholder="Ex.: Programação I" /></label><div class="form-grid"><label>ECTS<input id="onboardingCourseEcts" type="number" min="0" max="30" step="0.5" value="6" /></label><label>Objetivo<input id="onboardingCourseTarget" type="number" min="0" max="20" step="0.1" value="12" /></label></div></fieldset>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="onboardingDialog">Cancelar</button><button class="button primary" type="submit">Criar semestre</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="semesterDialog" class="dialog wide">
+    <form id="semesterForm"><input id="semesterEditId" type="hidden" />
+      <div class="dialog-header"><div><p class="eyebrow">Período letivo</p><h2 id="semesterDialogTitle">Novo semestre</h2></div><button class="icon-button" type="button" data-close="semesterDialog">×</button></div>
+      <label>Nome<input id="semesterName" required maxlength="100" /></label><div class="form-grid"><label>Data inicial<input id="semesterStart" type="date" /></label><label>Data final<input id="semesterEnd" type="date" /></label></div><label class="check-row"><input id="semesterArchived" type="checkbox" /> Arquivar semestre</label>
+      <div id="semesterListManager" class="stack compact-stack"></div>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="semesterDialog">Fechar</button><button class="button primary" type="submit">Guardar semestre</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="courseDialog" class="dialog wide">
+    <form id="courseForm"><input id="courseEditId" type="hidden" />
+      <div class="dialog-header"><div><p class="eyebrow">Disciplina</p><h2 id="courseDialogTitle">Adicionar disciplina</h2></div><button class="icon-button" type="button" data-close="courseDialog">×</button></div>
+      <label>Nome<input id="courseName" required maxlength="80" /></label>
+      <div class="form-grid"><label>ECTS<input id="courseEcts" type="number" min="0" max="30" step="0.5" value="6" required /></label><label>Dificuldade<select id="courseDifficulty"><option value="1">1 — Muito baixa</option><option value="2">2 — Baixa</option><option value="3" selected>3 — Média</option><option value="4">4 — Alta</option><option value="5">5 — Muito alta</option></select></label></div>
+      <div class="form-grid"><label>Nota objetivo<input id="courseTarget" type="number" min="0" max="20" step="0.1" value="12" required /></label><label>Nota mínima final<input id="coursePassingGrade" type="number" min="0" max="20" step="0.1" value="9.5" required /></label></div>
+      <div class="form-grid"><label>Arredondamento<select id="courseRounding"><option value="none">Sem arredondamento</option><option value="oneDecimal">Uma casa decimal</option><option value="nearestInteger">Inteiro mais próximo</option><option value="ceilingInteger">Inteiro por excesso</option></select></label><label>Assiduidade atual (%)<input id="courseAttendance" type="number" min="0" max="100" step="0.1" value="100" /></label></div>
+      <label class="check-row"><input id="courseAttendanceRequired" type="checkbox" /> Existe assiduidade mínima</label><label id="attendanceMinimumLabel" hidden>Assiduidade mínima (%)<input id="courseAttendanceMinimum" type="number" min="0" max="100" step="0.1" value="75" /></label>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="courseDialog">Cancelar</button><button class="button primary" type="submit">Guardar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="templateDialog" class="dialog">
+    <form id="templateForm"><div class="dialog-header"><div><p class="eyebrow">Modelo rápido</p><h2>Criar disciplina por modelo</h2></div><button class="icon-button" type="button" data-close="templateDialog">×</button></div>
+      <label>Nome da disciplina<input id="templateCourseName" required /></label><label>Modelo<select id="templateType"><option value="tests_project">60% testes + 40% projeto</option><option value="two_tests">Dois testes de 50%</option><option value="exam">Exame final de 100%</option><option value="theory_practice">Teórica 50% + prática 50%</option></select></label>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="templateDialog">Cancelar</button><button class="button primary" type="submit">Criar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="componentDialog" class="dialog">
+    <form id="componentForm"><input id="componentCourseId" type="hidden" /><input id="componentEditId" type="hidden" />
+      <div class="dialog-header"><div><p class="eyebrow">Componente</p><h2 id="componentDialogTitle">Adicionar componente</h2></div><button class="icon-button" type="button" data-close="componentDialog">×</button></div>
+      <label>Nome<input id="componentName" required maxlength="80" /></label><div class="form-grid"><label>Peso final (%)<input id="componentWeight" type="number" min="0.1" max="100" step="0.1" required /></label><label>Média mínima<input id="componentMinimum" type="number" min="0" max="20" step="0.1" value="0" /></label></div>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="componentDialog">Cancelar</button><button class="button primary" type="submit">Guardar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="assessmentDialog" class="dialog wide">
+    <form id="assessmentForm"><input id="assessmentCourseId" type="hidden" /><input id="assessmentEditId" type="hidden" />
+      <div class="dialog-header"><div><p class="eyebrow">Avaliação</p><h2 id="assessmentDialogTitle">Adicionar avaliação</h2></div><button class="icon-button" type="button" data-close="assessmentDialog">×</button></div>
+      <label>Nome<input id="assessmentName" required maxlength="80" /></label>
+      <div class="form-grid"><label>Componente<select id="assessmentComponentId" required></select></label><label>Época<select id="assessmentAttemptType"><option value="normal">Normal</option><option value="exam">Exame</option><option value="resit">Recurso</option><option value="improvement">Melhoria</option></select></label></div>
+      <div class="form-grid"><label>Substituição<select id="assessmentReplacementMode"><option value="none">Não substitui</option><option value="target">Substitui avaliação específica</option><option value="worst_in_component">Substitui a pior nota da componente</option></select></label><label id="replacementTargetLabel" hidden>Avaliação substituída<select id="assessmentReplacementFor"><option value="">Selecionar</option></select></label></div>
+      <div class="form-grid"><label>Política da substituição<select id="assessmentReplacementPolicy"><option value="best">Mantém a melhor nota</option><option value="always">Substitui sempre</option></select></label><label>Peso dentro da componente (%)<input id="assessmentWeight" type="number" min="0" max="100" step="0.1" required /></label></div>
+      <div class="form-grid"><label>Nota obtida<input id="assessmentGrade" type="number" min="0" max="20" step="0.1" /></label><label>Data<input id="assessmentDate" type="date" /></label></div>
+      <div class="form-grid"><label>Nota mínima própria<input id="assessmentMinimum" type="number" min="0" max="20" step="0.1" value="0" /></label><label class="check-row checkbox-label"><input id="assessmentMandatory" type="checkbox" /> Avaliação obrigatória</label></div>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="assessmentDialog">Cancelar</button><button class="button primary" type="submit">Guardar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="taskDialog" class="dialog">
+    <form id="taskForm"><input id="taskEditId" type="hidden" />
+      <div class="dialog-header"><div><p class="eyebrow">Tarefa</p><h2 id="taskDialogTitle">Adicionar tarefa</h2></div><button class="icon-button" type="button" data-close="taskDialog">×</button></div>
+      <label>Título<input id="taskTitle" required maxlength="120" /></label><div class="form-grid"><label>Disciplina<select id="taskCourseId"><option value="">Sem disciplina</option></select></label><label>Prazo<input id="taskDueDate" type="date" required /></label></div>
+      <div class="form-grid"><label>Prioridade<select id="taskPriority"><option value="low">Baixa</option><option value="medium" selected>Média</option><option value="high">Alta</option></select></label><label>Tipo de estudo<select id="taskActivityType"><option value="reading">Leitura</option><option value="exercises">Exercícios</option><option value="project">Projeto</option><option value="review">Revisão</option><option value="other">Outro</option></select></label></div>
+      <label>Horas estimadas<input id="taskHours" type="number" min="0.25" max="500" step="0.25" value="2" required /></label>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="taskDialog">Cancelar</button><button class="button primary" type="submit">Guardar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="commitmentDialog" class="dialog">
+    <form id="commitmentForm"><input id="commitmentEditId" type="hidden" />
+      <div class="dialog-header"><div><p class="eyebrow">Calendário</p><h2 id="commitmentDialogTitle">Adicionar compromisso</h2></div><button class="icon-button" type="button" data-close="commitmentDialog">×</button></div>
+      <label>Título<input id="commitmentTitle" required maxlength="100" /></label><div class="form-grid"><label>Data<input id="commitmentDate" type="date" required /></label><label>Tipo<select id="commitmentType"><option value="class">Aula</option><option value="work">Trabalho</option><option value="personal">Pessoal</option><option value="other">Outro</option></select></label></div><div class="form-grid"><label>Início<input id="commitmentStart" type="time" required /></label><label>Fim<input id="commitmentEnd" type="time" required /></label></div><label>Disciplina<select id="commitmentCourseId"><option value="">Sem disciplina</option></select></label>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="commitmentDialog">Cancelar</button><button class="button primary" type="submit">Guardar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="sessionDialog" class="dialog">
+    <form id="sessionForm"><input id="sessionEditId" type="hidden" />
+      <div class="dialog-header"><div><p class="eyebrow">Estudo</p><h2 id="sessionDialogTitle">Registar sessão</h2></div><button class="icon-button" type="button" data-close="sessionDialog">×</button></div>
+      <div class="form-grid"><label>Data<input id="sessionDate" type="date" required /></label><label>Duração (minutos)<input id="sessionDuration" type="number" min="5" max="1440" step="5" value="60" required /></label></div>
+      <div class="form-grid"><label>Disciplina<select id="sessionCourseId"><option value="">Sem disciplina</option></select></label><label>Tarefa<select id="sessionTaskId"><option value="">Sem tarefa</option></select></label></div>
+      <div class="form-grid"><label>Método<select id="sessionActivityType"><option value="reading">Leitura</option><option value="exercises">Exercícios</option><option value="project">Projeto</option><option value="review">Revisão</option><option value="other">Outro</option></select></label><label>Foco<select id="sessionFocus"><option value="1">1 — Muito baixo</option><option value="2">2 — Baixo</option><option value="3" selected>3 — Médio</option><option value="4">4 — Bom</option><option value="5">5 — Excelente</option></select></label></div>
+      <label>Notas<textarea id="sessionNotes" maxlength="300" rows="3"></textarea></label>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="sessionDialog">Cancelar</button><button class="button primary" type="submit">Guardar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="settingsDialog" class="dialog wide">
+    <form id="settingsForm">
+      <div class="dialog-header"><div><p class="eyebrow">Definições</p><h2>Planeamento, alertas e sincronização</h2></div><button class="icon-button" type="button" data-close="settingsDialog">×</button></div>
+      <fieldset><legend>Disponibilidade semanal</legend><p class="hint">Os compromissos do calendário são descontados automaticamente.</p><div id="availabilityFields" class="availability-grid"></div><label>Máximo por sessão<input id="maxSessionHours" type="number" min="0.25" max="4" step="0.25" value="1.5" required /></label></fieldset>
+      <fieldset><legend>Alertas</legend><label class="check-row"><input id="notificationsEnabled" type="checkbox" /> Ativar notificações do navegador</label><div class="form-grid"><label>Avisar avaliações com antecedência (dias)<input id="assessmentReminderDays" type="number" min="0" max="30" value="7" /></label><label>Avisar tarefas com antecedência (dias)<input id="taskReminderDays" type="number" min="0" max="30" value="3" /></label></div></fieldset>
+      <fieldset><legend>Ficheiro de sincronização opcional</legend><p class="hint">Liga um JSON numa pasta OneDrive, Google Drive ou Dropbox. O UniPlan não envia dados para servidores próprios.</p><div class="actions"><button id="connectSyncBtn" class="button secondary" type="button">Ligar ficheiro</button><button id="saveSyncBtn" class="button secondary" type="button">Guardar agora</button><button id="loadSyncBtn" class="button secondary" type="button">Carregar agora</button></div><label class="check-row"><input id="autoSyncEnabled" type="checkbox" /> Guardar automaticamente no ficheiro ligado</label><p id="syncStatus" class="hint">Nenhum ficheiro ligado.</p></fieldset>
+      <div class="dialog-actions"><button class="button secondary" type="button" data-close="settingsDialog">Cancelar</button><button class="button primary" type="submit">Guardar definições</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="notificationsDialog" class="dialog">
+    <div class="dialog-content"><div class="dialog-header"><div><p class="eyebrow">Alertas</p><h2>O que precisa de atenção</h2></div><button class="icon-button" type="button" data-close="notificationsDialog">×</button></div><div id="notificationsList" class="stack"></div></div>
+  </dialog>
+
+  <dialog id="dataDialog" class="dialog wide">
+    <div class="dialog-content"><div class="dialog-header"><div><p class="eyebrow">Dados</p><h2>Importar, exportar e recuperar</h2></div><button class="icon-button" type="button" data-close="dataDialog">×</button></div>
+      <div class="data-grid">
+        <article class="card inset"><h3>Backup completo</h3><p>Guarda ou restaura todos os dados.</p><div class="actions"><button id="exportBtn" class="button primary" type="button">Exportar JSON</button><label class="button secondary file-button">Importar JSON<input id="importInput" type="file" accept="application/json" hidden /></label></div></article>
+        <article class="card inset"><h3>Calendário</h3><p>Exporta ou importa eventos em formato ICS.</p><div class="actions"><button id="exportIcsBtn" class="button secondary" type="button">Exportar ICS</button><label class="button secondary file-button">Importar ICS<input id="importIcsInput" type="file" accept=".ics,text/calendar" hidden /></label></div></article>
+        <article class="card inset"><h3>Importação CSV</h3><p>Importa disciplinas, tarefas e avaliações a partir do modelo incluído.</p><div class="actions"><button id="downloadCsvTemplateBtn" class="button secondary" type="button">Modelo CSV</button><label class="button secondary file-button">Importar CSV<input id="importCsvInput" type="file" accept=".csv,text/csv" hidden /></label></div></article>
+        <article class="card inset"><h3>Recuperação</h3><p>Restaura a cópia local anterior ou elimina tudo.</p><div class="actions"><button id="restorePreviousBtn" class="button secondary" type="button">Restaurar anterior</button><button id="resetBtn" class="button danger" type="button">Apagar dados</button></div></article>
+      </div>
+    </div>
+  </dialog>
+
+  <template id="courseTemplate">
+    <article class="course-card card">
+      <div class="course-main"><div><div class="course-title-row"><h3 class="course-name"></h3><span class="course-ects badge subtle"></span></div><p class="course-summary"></p></div><div class="course-score"><strong></strong><small>contribuição conhecida</small></div></div>
+      <div class="progress"><span></span></div><div class="course-status"></div><div class="course-insights"></div><div class="components"></div>
+      <div class="card-actions"><button class="button secondary add-component" type="button">Componente</button><button class="button secondary add-assessment" type="button">Avaliação</button><button class="button secondary simulate-course" type="button">Simular</button><button class="button secondary edit-course" type="button">Editar</button><button class="button danger delete-course" type="button">Eliminar</button></div>
+    </article>
+  </template>
+
+  <div id="toastRegion" class="toast-region" aria-live="polite"></div>
+  <script src="js/core.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

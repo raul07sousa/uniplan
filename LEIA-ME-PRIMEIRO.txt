@@ -1,0 +1,14 @@
+UNIPLAN 3.0 — INSTALAÇÃO
+
+1. Extrai todo o conteúdo do ZIP.
+2. Executa INSTALAR_UNIPLAN.bat.
+3. Será criado um atalho UniPlan no Ambiente de Trabalho.
+4. A aplicação abrirá numa janela própria do Chrome ou Edge.
+
+Não é necessário instalar Python ou Node.js.
+Não movas ficheiros para a pasta de instalação manualmente.
+Para atualizar, executa o instalador da nova versão.
+Antes de atualizar, exporta um Backup JSON.
+
+Ficheiro principal para utilização: INSTALAR_UNIPLAN.bat
+Ficheiro para execução portátil: INICIAR_WINDOWS.bat
